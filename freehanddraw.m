@@ -42,7 +42,7 @@ oldhold = ishold(gca);
 
 hold on;
 
-set(gcf,'Pointer','crosshair','doublebuffer','on');
+%set(gcf,'Pointer','crosshair','doublebuffer','on');
 
 %Get the initial point
 [xs,ys,zs] = ginput(1);

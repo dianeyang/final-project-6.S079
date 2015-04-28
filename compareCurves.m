@@ -1,40 +1,44 @@
-function [output_args] = compareCurves(curve1, curve2)
-    % Generate the 2 curves we want to compare
-    t = 0:0.01:2*pi;
-    [x1, y1] = ellipse(t);
-    [x2, y2] = ellipse(t);
+function [distance] = compareCurves(x1, y1, x2, y2)
+% Calculate the distance metric between 2 input curves
+
+    % Compute arc lengths and normalize
+    [arcLen1, totalLen1] = arcLength(x1, y1);
+    [arcLen2, totalLen2] = arcLength(x2, y2);
+    arcLen1 = arcLen1 / totalLen1;
+    arcLen2 = arcLen2 / totalLen2;
+
+    % Compute curvature at each point
+    curvature1 = curvature(x1, y1);
+    curvature2 = curvature(x2, y2);
     
-    % Compute the Euclidean signature of each curve
-    [kappa1, dkds1] = discreteEuclideanSignature(x1, y1);
-    [kappa2, dkds2] = discreteEuclideanSignature(x2, y2);
+    % Compute distance between signature curves
+    distance = discreteFrechetDist([arcLen1 curvature1], [arcLen2 curvature2])
     
-    % Compute distance between original curves & between signature curves
-    % (originalDist is for curiosity, signatureDist is what we really want)
-    originalDist = discreteFrechetDist([x1 y1], [x2 y2])
-    signatureDist = discreteFrechetDist([kappa1 dkds1], [kappa2 dkds2])
-    
-    createPlot(x1, y1, x2, y2, kappa1, dkds1, kappa2, dkds2)
+    plotTwo(x1, y1, x2, y2, curvature1, curvature2, arcLen1, arcLen2)
 end
 
-function [] = createPlot(x1, y1, x2, y2, kappa1, dkds1, kappa2, dkds2)
+function [] = plotTwo(x1, y1, x2, y2, curv1, curv2, s1, s2)
     figure
     subplot(2,1,1);
-    title('Original curve');
     plot(x1,y1)
     hold on
     plot(x2,y2)
+    title('Original curve');
+    xlabel('x')
+    ylabel('y')
     
     subplot(2,1,2);
-    title('Euclidean signature');
-    xlabel('curvature');
-    ylabel('dk/ds');
-    plot(kappa1, dkds1)
+    plot(s2, curv1)
     hold on
-    plot(kappa2, dkds2)
+    plot(s2, curv2)
+    title('Signature curve')
+    xlabel('Arc length')
+    ylabel('Curvature')
 end
 
-function [kappa] = curvature(x, y)
-    % Compute curvature = u_xx / (1 + u_x^2)^(3/2)
+function [curvature] = curvature(x, y)
+% Compute curvature = u_xx / (1 + u_x^2)^(3/2)
+% Can also be viewed as the 2nd derivative of slope wrt arc length
     x_prime = gradient(x);
     y_prime = gradient(y);
     x_2prime = gradient(x_prime);
@@ -42,62 +46,25 @@ function [kappa] = curvature(x, y)
     
     numerator = abs((x_prime .* y_2prime) - (y_prime .* x_2prime));
     denominator = (x_prime.^2 + y_prime.^2).^(3/2);
-    kappa = numerator ./ denominator;
+    curvature = chop(numerator ./ denominator);
 end
 
-function [dkds] = dkds(x, y, kappa)
-    % Compute dk/ds
-    dkdx = gradient(kappa);
-    dsdx = sqrt(1+gradient(y).^2);
-    dkds = dkdx ./ dsdx;
+function [arcLength, totalLength] = arcLength(x, y)
+% Compute cumulative arc length, then normalize length to 1
+    x_prime = chop(gradient(x));
+    y_prime = chop(gradient(y));
+    N = length(x_prime);
+    arcLength = zeros(N, 1);
+    increments = zeros(N, 1);
+    for i=2:N
+        prev = arcLength(i-1);
+        ds = sqrt(x_prime(i)^2 + y_prime(i)^2);
+        arcLength(i) = prev + ds;
+    end
+    arcLength = arcLength';
+    totalLength = arcLength(end);
 end
 
-function [kappa, deriv] = discreteEuclideanSignature(x, y)
-    kappa = curvature(x, y);
-    deriv = dkds(x, y, kappa);
-    % Throw out the first 3 and last 3 values (I think they're
-    % messed up because of how the gradient function works)
-    kappa = kappa(4:end-3);
-    deriv = deriv(4:end-3);
-end
-
-% function [dist] = hausdorffDistance(x1, y1, x2, y2) 
-%
-% end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CURVES
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function [x,y] = circle(t)
-    x = cos(t);
-    y = sin(t);
-end
-
-function [x,y] = ellipse(t)
-% From page 33 of http://www.math.umn.edu/~olver/vi_/sig.pdf
-    x = (-6/5) + (9/5)*cos(t);
-    y = (3/sqrt(5))*sin(t);
-end
-
-function [x,y] = ellipse2(t)
-    x = (3/sqrt(5))*sin(t) + 3;
-    y = (-6/5) + (9/5)*cos(t) + 3;
-end
-
-function [x,y] = limacon(t)
-    x = 0.05 + 3*cos(t) + 0.05*cos(2*t);
-    y = 3*sin(t) + 0.05*sin(2*t);
-end
-
-function [x,y] = roundedTriangleThing(t)
-%This thing http://bit.ly/1PCuDV8
-    x = cos(t) + 0.2*cos(t).^2;
-    y = sin(t) + 0.1*sin(t).^2;
-end
-
-function [x,y] = eggThing(t)
-% From page 37 of http://www.math.umn.edu/~olver/vi_/sig.pdf
-    x = cos(t) + 0.2*cos(t).^2;
-    y = 0.5*x + sin(t) + 0.1*sin(t).^2;
+function [result] = chop(arr)
+    result = arr(4:end-3);
 end

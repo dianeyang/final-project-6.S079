@@ -113,6 +113,7 @@ function [curve] = getBSpline()
     end
 end
 
+%%
 function [hLines, pts] = drawCurve(p)
     [h1, pts1] = drawSpline(p(:,1), p(:,2), p(:,3), p(:,4));
     [h2, pts2] = drawSpline(p(:,4), p(:,5), p(:,6), p(:,7));
@@ -128,6 +129,7 @@ function [hLines, pts] = drawCurve(p)
     pts = [pts1 pts2 pts3 pts4];
 end
 
+%%
 function [hLine, pts] = drawSpline(pt1, pt2, pt3, pt4)
     t = linspace(0,1,101);
     pts = kron((1-t).^3, pt1) + kron(3*(1-t).^2.*t, pt2) + kron(3*(1-t).*t.^2, pt3) + kron(t.^3, pt4);

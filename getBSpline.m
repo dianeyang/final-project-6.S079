@@ -1,15 +1,17 @@
 function [curve] = getBSpline()
+% Allows user to use 12 control points to draw curve
+% Press any key when done drawing and return points in curve
     % set up the figure
     fig = figure();
     a = axes;
     cla
-    xlim([0 80])
-    ylim([-40 50])
+    xlim([-40 40])
+    ylim([-40 40])
     axis equal
     
-    % initial positions of control points
-    controlPoints = [5  18 38 45 52 60 70 80 70 50 30  -8;
-                    -10 18 -5 15 35 40 30 20 5 -10 -25 -38];
+    % initial positions of control points (approximately a circle)
+    controlPoints = [-30 -30 -17 0  17 30 30 30  17   0 -17 -30;
+                      0   17  30 30 30 17 0 -17 -30 -30 -30 -17]
     nPoints = length(controlPoints);
     
     % draw draggable control points & curve

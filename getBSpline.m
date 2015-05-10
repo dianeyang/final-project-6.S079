@@ -11,7 +11,7 @@ function [curve] = getBSpline()
     
     % initial positions of control points (approximately a circle)
     controlPoints = [-30 -30 -17 0  17 30 30 30  17   0 -17 -30;
-                      0   17  30 30 30 17 0 -17 -30 -30 -30 -17]
+                      0   17  30 30 30 17 0 -17 -30 -30 -30 -17];
     nPoints = length(controlPoints);
     
     % draw draggable control points & curve
@@ -23,6 +23,7 @@ function [curve] = getBSpline()
     [hLines, ~] = drawCurve(controlPoints);
     
     pause
+    close(fig);
     
     % called whenever impoints moves to new position
     function callback(pos)
@@ -131,7 +132,7 @@ end
 
 %%
 function [hLine, pts] = drawSpline(pt1, pt2, pt3, pt4)
-    t = linspace(0,1,101);
+    t = linspace(0,1,25);
     pts = kron((1-t).^3, pt1) + kron(3*(1-t).^2.*t, pt2) + kron(3*(1-t).*t.^2, pt3) + kron(t.^3, pt4);
     hLine = plot(pts(1,:),pts(2,:), 'black');
 end

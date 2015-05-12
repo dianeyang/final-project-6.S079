@@ -1,4 +1,15 @@
-function curve = getLinkageCurve(l1, l2, l3, l4, r, phi)
+function curve = getLinkageCurve(linkage, draw)
+if nargin < 2
+    draw = false;
+end
+
+l1 = linkage(1);
+l2 = linkage(2);
+l3 = linkage(3);
+l4 = linkage(4);
+r = linkage(5);
+phi = linkage(6);
+
 % Set up the scene here.
 % Note that links don't have to be placed exactly. The first call to
 % solveLinkage() will automatically snap the links so that all the
@@ -53,6 +64,9 @@ for i = 1 : length(links)
     links(i).angleTarget = links(i).angle;
     links(i).posTarget = links(i).pos;
 end
+if draw
+    drawScene(links,pins,particles,true);
+end
 
 % lsqnonlin options
 if verLessThan('matlab','8.1')
@@ -81,6 +95,9 @@ while t < T
     [links,feasible] = solveLinkage(links,pins,opt);
     % Update particle positions
     particles = updateParticles(links,particles);
+    if draw
+        drawScene(links,pins,particles);
+    end
     % Quit if over-constrained
     if ~feasible
         break;
@@ -89,8 +106,10 @@ while t < T
 end
 
 if ~feasible
+    disp(['Mechanism is over constrained! ', num2str(l1), ' ', num2str(l2), ' ', num2str(l3), ' ', num2str(l4), ' ', num2str(r), ' ', num2str(phi)]);
     curve = [];
 else
+    disp(['Mechanism works. ', num2str(l1), ' ', num2str(l2), ' ', num2str(l3), ' ', num2str(l4), ' ', num2str(r), ' ', num2str(phi)]);
     curve = particles(1).ptsWorld;
 end
 end
@@ -134,7 +153,6 @@ ub =  inf(size(angPos0));
 % If the mechanism is feasible, then the residual should be zero
 feasible = true;
 if r2 > 1e-6
-    fprintf('Mechanism is over constrained!\n');
     feasible = false;
 end
 % Extract the angles and positions from the values in the vector

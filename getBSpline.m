@@ -20,7 +20,7 @@ function [curve] = getBSpline()
        hPoints(i) = impoint(a, controlPoints(1,i), controlPoints(2,i));
        ids(i) = addNewPositionCallback(hPoints(i), @callback);
     end
-    [hLines, ~] = drawCurve(controlPoints);
+    [hLines, curve] = drawCurve(controlPoints);
     
     pause
     close(fig);
@@ -132,7 +132,8 @@ end
 
 %%
 function [hLine, pts] = drawSpline(pt1, pt2, pt3, pt4)
-    t = linspace(0,1,25);
+    t = linspace(0,1,26);
+    t = t(1:25);
     pts = kron((1-t).^3, pt1) + kron(3*(1-t).^2.*t, pt2) + kron(3*(1-t).*t.^2, pt3) + kron(t.^3, pt4);
     hLine = plot(pts(1,:),pts(2,:), 'black');
 end

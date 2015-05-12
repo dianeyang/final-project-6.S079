@@ -1,5 +1,9 @@
-function [distance] = compareCurves(curve1, curve2)
+function [distance] = compareCurves(curve1, curve2, draw)
 % Calculate the distance metric between 2 input curves
+    if nargin < 3
+        draw = false;
+    end
+    
     % Compute arc lengths and normalize
     [arcLen1, totalLen1] = arcLength(curve1);
     [arcLen2, totalLen2] = arcLength(curve2);
@@ -11,11 +15,11 @@ function [distance] = compareCurves(curve1, curve2)
     curvature2 = curvature(curve2);
     
     % Find rotation of curve that minimizes distance
-    minDist = discreteFrechetDist([arcLen1 curvature1], [arcLen2 curvature2]);
+    minDist = mean(abs(curvature1 - curvature2));
     shift = 0;
     for i=1:length(curvature1)
         curvature2 = circshift(curvature2,1,2);
-        distance = discreteFrechetDist([arcLen1 curvature1], [arcLen2 curvature2])
+        distance = mean(abs(curvature1 - curvature2));;
         if distance < minDist
             minDist = distance;
             shift = i;
@@ -25,35 +29,41 @@ function [distance] = compareCurves(curve1, curve2)
     
     % Scale: scale signature curve
     curvature2 = curvature2 * (totalLen2/totalLen1);
+    distance = mean(abs(curvature1 - curvature2));
     
-    plotTwo(curve1, curve2, curvature1, curvature2, arcLen1, arcLen2)
+    if draw
+        plotTwo(curve1, curve2, curvature1, curvature2, arcLen1, arcLen2)
+    end
 end
 
 function [] = plotTwo(curve1, curve2, k1, k2, s1, s2)
-    x1 = curve1(1,:);
-    y1 = curve1(2,:);
-    x2 = curve2(1,:);
-    y2 = curve2(2,:);
-    
     figure
-    subplot(2,1,1);
-    plot(x1,y1)
-    hold on
-    plot(x2,y2)
-    title('Original curve');
+    subplot(2,2,1);
+    plot(curve1(1,:), curve1(2,:), 'blue')
+    title('Desired curve');
     xlabel('x')
     ylabel('y')
     
-    subplot(2,1,2);
-    plot(s2, k1)
-    hold on
-    plot(s2, k2)
+    subplot(2,2,2);
+    plot(curve2(1,:), curve2(2,:), 'red')
+    title('Final curve');
+    xlabel('x')
+    ylabel('y')
+    
+    subplot(2,2,3);
+    plot(s2, k1, 'blue')
+    title('Signature curve')
+    xlabel('Arc length')
+    ylabel('Curvature')
+    
+    subplot(2,2,4);
+    plot(s2, k2, 'red')
     title('Signature curve')
     xlabel('Arc length')
     ylabel('Curvature')
 end
 
-function [curvature] = curvature(curve)
+function curvature = curvature(curve)
 % Compute curvature = u_xx / (1 + u_x^2)^(3/2)
 % Can also be viewed as the 2nd derivative of slope wrt arc length
     x = curve(1,:);
@@ -63,7 +73,7 @@ function [curvature] = curvature(curve)
     x_2prime = gradient(x_prime);
     y_2prime = gradient(y_prime);
     
-    numerator = abs((x_prime .* y_2prime) - (y_prime .* x_2prime));
+    numerator = (x_prime .* y_2prime) - (y_prime .* x_2prime);
     denominator = (x_prime.^2 + y_prime.^2).^(3/2);
     curvature = chop(numerator ./ denominator);
 end

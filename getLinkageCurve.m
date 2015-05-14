@@ -1,4 +1,4 @@
-function curve = getLinkageCurve(linkage, draw)
+function [curve, pins, links] = getLinkageCurve(linkage, draw)
 if nargin < 2
     draw = false;
 end
@@ -16,40 +16,17 @@ phi = linkage(6);
 % constraints are satisfied.
 pins = [];
 particles = [];
-links(1).angle = 0; % rotation from the positive x-axis
-links(1).pos = [-1;0]; % position of the center of rotation
-links(1).verts = [0,0;l1,0]'; % display vertices
-% Left link
-links(2).angle = pi/2;
-links(2).pos = [-1;0];
-links(2).verts = [0,0;l2,0]';
-% Right link
-links(3).angle = pi/2;
-links(3).pos = [1;0];
-links(3).verts = [0,0;l3,0]';
-% Top link
-links(4).angle = 0;
-links(4).pos = [-1;1];
-links(4).verts = [0,0;l4,0; r*cos(phi), r*sin(phi)]';
+links = getLinkVerts(l1, l2, l3, l4, r, phi);
 
 % Which link is grounded?
 grounded = 1;
 % Which link is the driver?
 % Note: the driver must be attached (with a pin) to the ground.
 driver = 2;
+% Which link is the coupler?
+coupler = 4;
 
-% Bottom-left
-pins(1).links = [1,2];
-pins(1).pts = [0,0;0,0]';
-% Bottom-right
-pins(2).links = [1,3];
-pins(2).pts = [l1,0;0,0]';
-% Left-top
-pins(3).links = [2,4];
-pins(3).pts = [l2,0;0,0]';
-% Right-top
-pins(4).links = [3,4];
-pins(4).pts = [l3,0;l4,0]';
+pins = getPinPositions(linkage);
 
 % List of tracer particles for display
 particles(1).link = 4; % which link?
@@ -60,6 +37,7 @@ particles(1).ptsWorld = zeros(2,0); % transformed points, initially empty
 for i = 1 : length(links)
     links(i).grounded = (i == grounded);
     links(i).driver = (i == driver);
+    links(i).coupler = (i == coupler);
     % These target quantities are only used for grounded and driver links
     links(i).angleTarget = links(i).angle;
     links(i).posTarget = links(i).pos;
@@ -133,6 +111,52 @@ if nargout >= 2
     dR(2,2) = -s;
 end
 end
+
+%%
+function links = getLinkVerts(l1, l2, l3, l4, r, phi)
+    links(1).angle = 0; % rotation from the positive x-axis
+    links(1).pos = [-1;0]; % position of the center of rotation
+    links(1).verts = [-.05,-.05; l1+.05,-.05; l1+.05,.05; -.05,.05]'; % display vertices
+    % Left link
+    links(2).angle = pi/2;
+    links(2).pos = [-1;0];
+    links(2).verts = [-.05,-.05; l2+.05,-.05; l2+.05,.05; -.05,.05]';
+    % Right link
+    links(3).angle = pi/2;
+    links(3).pos = [1;0];
+    links(3).verts = [-.05,-.05; l3+.05,-.05; l3+.05,.05; -.05,.05]';
+    % Top link
+    links(4).angle = 0;
+    links(4).pos = [-1;1];
+    if r*cos(phi) < -.2
+        links(4).verts = [r*cos(phi), r*sin(phi); -.05,-.05; l4+.05,-.05; l4+.05,.05; -.05,.05]';
+    elseif r*cos(phi) > l4+.2
+        links(4).verts = [-.05,-.05; l4+.05,-.05; r*cos(phi), r*sin(phi); l4+.05,.05; -.05,.05]';
+    elseif r*sin(phi) > .05
+        links(4).verts = [-.05,-.05; l4+.05,-.05; l4+.05,.05; r*cos(phi), r*sin(phi); -.05,.05]';
+    elseif r*sin(phi) < -.05
+        links(4).verts = [-.05,-.05; r*cos(phi), r*sin(phi); l4+.05,-.05; l4+.05,.05; -.05,.05]';
+    else
+        links(4).verts = [-.05,-.05; l4+.05,-.05; l4+.05,.05; -.05,.05]';
+    end
+end
+
+%%
+function pins = getPinPositions(linkage)
+    % Bottom-left
+    pins(1).links = [1,2];
+    pins(1).pts = [0,0;0,0]';
+    % Bottom-right
+    pins(2).links = [1,3];
+    pins(2).pts = [linkage(1),0;0,0]';
+    % Left-top
+    pins(3).links = [2,4];
+    pins(3).pts = [linkage(2),0;0,0]';
+    % Right-top
+    pins(4).links = [3,4];
+    pins(4).pts = [linkage(3),0;linkage(4),0]';
+end
+
 
 %%
 function [links,feasible] = solveLinkage(links,pins,opt)

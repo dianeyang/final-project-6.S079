@@ -1,4 +1,4 @@
-function [curve, pins, links] = getLinkageCurve(linkage, draw)
+function [curve, links, pins] = getLinkageCurve(linkage, draw)
 if nargin < 2
     draw = false;
 end
@@ -83,11 +83,16 @@ while t < T
     t = t + dt;
 end
 
+
 if ~feasible
-    disp(['Mechanism is over constrained! ', num2str(l1), ' ', num2str(l2), ' ', num2str(l3), ' ', num2str(l4), ' ', num2str(r), ' ', num2str(phi)]);
+    if ~draw
+        disp(['Mechanism is over constrained! ', num2str(l1), ' ', num2str(l2), ' ', num2str(l3), ' ', num2str(l4), ' ', num2str(r), ' ', num2str(phi)]);
+    end
     curve = [];
 else
-    disp(['Mechanism works. ', num2str(l1), ' ', num2str(l2), ' ', num2str(l3), ' ', num2str(l4), ' ', num2str(r), ' ', num2str(phi)]);
+    if ~draw
+        disp(['Mechanism works. ', num2str(l1), ' ', num2str(l2), ' ', num2str(l3), ' ', num2str(l4), ' ', num2str(r), ' ', num2str(phi)]);
+    end
     curve = particles(1).ptsWorld;
 end
 end

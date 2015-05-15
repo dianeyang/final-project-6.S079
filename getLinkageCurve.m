@@ -1,3 +1,7 @@
+%% getLinkageCurve.m
+% Simulate linkage given bar lengths, return points in path
+% traced out by coupler point. Adapted from assignment 3.
+
 function [curve, links, pins] = getLinkageCurve(linkage, draw)
 if nargin < 2
     draw = false;

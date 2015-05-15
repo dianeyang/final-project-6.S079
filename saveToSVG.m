@@ -1,6 +1,8 @@
-function saveToSVG(links,pins,scale)
-% Print scene to SVG file
+%% saveToSVG.m
+% Takes in a linkage design and outputs an SVG version
+% for laser cutting. Adapted from lab 3.
 
+function saveToSVG(links,pins,scale)
 % Printing options
 % We're using inches.
 boardSize = 12;

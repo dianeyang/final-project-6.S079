@@ -1,3 +1,8 @@
+%% initPopulation.m
+% Passed in as option to genetic algorithm. Randomly generate
+% bar lengths and try to arrange them in feasible linkage
+% according to relationships between lengths.
+
 function population = initPopulation(GenomeLength, FitnessFcn, options)
     population = zeros(options.PopulationSize, GenomeLength);
     for i=1:options.PopulationSize

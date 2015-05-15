@@ -1,3 +1,8 @@
+%% runGeneticAlgorithm.m
+% Sets up options and constraints for MATLAB's built-in
+% genetic algorithm implementation. Runs genetic algorithm
+% and gets output.
+
 function [linkage, Fval] = runGeneticAlgorithm(desiredPath, popSize, nGenerations)
     % Setting Up a Problem for |ga|
     FitnessFunction = @(linkage) computeFitness(linkage, desiredPath);

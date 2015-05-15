@@ -1,6 +1,8 @@
+%% getBSpline.m
+% Allows user to drag control points for Bezier splines to
+% input curve. Press enter when done drawing and return points.
+
 function [curve] = getBSpline()
-% Allows user to use 12 control points to draw curve
-% Press any key when done drawing and return points in curve
     % set up the figure
     fig = figure();
     a = axes;

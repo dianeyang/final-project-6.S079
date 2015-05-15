@@ -1,5 +1,8 @@
+%% compareCurves.m
+% Takes two curves and computes their distance (According
+% to the fitness metric we defined)
+
 function [distance] = compareCurves(curve1, curve2, draw)
-% Calculate the distance metric between 2 input curves
     if nargin < 3
         draw = false;
     end

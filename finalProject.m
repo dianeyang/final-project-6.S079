@@ -1,5 +1,8 @@
+%% finalProject.m
+% Main program for running our final project.
+
 % Capture desired curve from user input
-fprintf('Please draw the path you want the coupler point to follow.\n\n');
+fprintf('Please draw the path you want the coupler point to follow. Press ENTER when you are done drawing.\n\n');
 desiredPath = getBSpline();
 
 % Set up and run genetic algorithm
